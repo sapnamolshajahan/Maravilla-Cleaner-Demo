@@ -3,12 +3,20 @@
 
         <xpath expr="//form" position="inside">
 
+             <t t-if="error_message">
+                <div class="alert alert-danger mt-2">
+                    <t t-esc="error_message"/>
+                </div>
+             </t>
+
             <!-- Room Number -->
             <div class="form-group mt-2">
                 <label>Room Number</label>
                 <input type="text"
                        name="room_number"
-                       class="form-control"/>
+                       class="form-control"
+                       pattern="[A-Za-z0-9]+"
+                       title="Only letters and numbers are allowed"/>
             </div>
 
             <!-- Room Type -->
@@ -23,8 +31,9 @@
             <div class="form-group mt-2">
                 <label>Check In</label>
                 <input type="date"
-                       name="check_in"
-                       class="form-control"/>
+                   name="check_in"
+                   class="form-control"
+                   t-att-min="datetime.date.today()"/>
             </div>
 
             <!-- Check Out -->
@@ -32,7 +41,8 @@
                 <label>Check Out</label>
                 <input type="date"
                        name="check_out"
-                       class="form-control"/>
+                       class="form-control"
+                       t-att-min="datetime.date.today()"/>
             </div>
 
             <!-- Number of Persons -->
@@ -51,6 +61,8 @@
                           class="form-control"
                           rows="3"></textarea>
             </div>
+
+
 
         </xpath>
 
