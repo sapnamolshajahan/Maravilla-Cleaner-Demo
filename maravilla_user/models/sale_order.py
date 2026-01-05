@@ -1,4 +1,6 @@
-from odoo import models,fields
+from odoo import models,fields,api
+from odoo.exceptions import ValidationError
+
 
 class SaleOrder(models.Model):
 
@@ -11,6 +13,15 @@ class SaleOrder(models.Model):
     check_out = fields.Date(string="Check Out")
     num_person = fields.Integer(string="Number of Persons")
     remarks = fields.Text(string="Remarks")
+
+    @api.constrains('check_in', 'check_out')
+    def _check_checkin_checkout(self):
+        for rec in self:
+            if rec.check_in and rec.check_out:
+                if rec.check_out < rec.check_in:
+                    raise ValidationError(
+                        "Check-out date cannot be before Check-in date."
+                    )
 
     def action_confirm(self):
         res = super().action_confirm()

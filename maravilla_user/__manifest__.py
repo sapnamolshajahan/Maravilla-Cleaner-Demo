@@ -36,6 +36,7 @@
                 'maravilla_user/static/src/css/dashboard.css',
                 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js',
                 'maravilla_user/static/src/js/dashboard.js',
+                'maravilla_user/static/src/js/checkout.js',
             ],
         },
 
