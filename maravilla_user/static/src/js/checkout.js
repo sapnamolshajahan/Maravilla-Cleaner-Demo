@@ -42,14 +42,18 @@ publicWidget.registry.CheckoutValidation = publicWidget.Widget.extend({
     },
 
     async _onConfirmClickValidated(ev) {
-        console.log("WOWWWWWWWWWWWWWWWWWWWWWWWWW");
+    console.log("ADDRESS CHECKOUT VALIDATION");
+
+        // 🔒 Run only on address step
         if (window.location.pathname !== "/shop/address") {
-            return this._super(ev);
+            return;
         }
 
+        // 🔒 Safety: fields must exist
         if (!$("input[name='check_in']").length) {
-            return this._super(ev);
+            return;
         }
+
         if (this._validating) return;
 
         this._validating = true;
@@ -64,47 +68,59 @@ publicWidget.registry.CheckoutValidation = publicWidget.Widget.extend({
             const checkOutVal = $("input[name='check_out']").val();
 
             // -------------------------
-            // ROOM NUMBER VALIDATION
+            // REQUIRED FIELD VALIDATION
             // -------------------------
-            if (roomNumber && !/^[A-Za-z0-9]+$/.test(roomNumber)) {
+            if (!roomNumber) {
+                this._showError("Please enter the Room Number.");
+                throw new Error("Room number missing");
+            }
+
+            if (!checkInVal) {
+                this._showError("Please select a Check-in date.");
+                throw new Error("Check-in missing");
+            }
+
+            if (!checkOutVal) {
+                this._showError("Please select a Check-out date.");
+                throw new Error("Check-out missing");
+            }
+
+            // -------------------------
+            // ROOM NUMBER FORMAT
+            // -------------------------
+            if (!/^[A-Za-z0-9]+$/.test(roomNumber)) {
                 this._showError(
-                    "Please check the Room Number. Special characters are not allowed."
+                    "Please check the Room Number. Only letters and numbers are allowed."
                 );
-                button.prop("disabled", false);
-                this._validating = false;
-                return;
+                throw new Error("Room number invalid");
             }
 
             // -------------------------
             // DATE VALIDATION
             // -------------------------
-            if (checkInVal && checkOutVal) {
-                const checkIn = this._parseDate(checkInVal);
-                const checkOut = this._parseDate(checkOutVal);
+            const checkIn = this._parseDate(checkInVal);
+            const checkOut = this._parseDate(checkOutVal);
 
-                if (checkOut < checkIn) {
-                    this._showError(
-                        "Check-out date cannot be before Check-in date."
-                    );
-                    button.prop("disabled", false);
-                    this._validating = false;
-                    return;
-                }
+            if (checkOut < checkIn) {
+                this._showError(
+                    "Check-out date cannot be before Check-in date."
+                );
+                throw new Error("Invalid date range");
             }
 
-            // ✅ ALL GOOD → PROCEED
+            // ✅ ALL GOOD → CONTINUE NORMAL FLOW
             button.prop("disabled", false);
             this._validating = false;
 
-            // Trigger original click
+            // Re-trigger original click
             button.off("click");
             button[0].click();
 
         } catch (err) {
-            console.error("Checkout validation error:", err);
-            this._showError("Something went wrong while validating your details.");
+            console.warn("Checkout blocked:", err.message);
             button.prop("disabled", false);
             this._validating = false;
         }
-    },
+    }
+
 });

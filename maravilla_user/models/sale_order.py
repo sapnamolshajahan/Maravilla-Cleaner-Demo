@@ -14,14 +14,31 @@ class SaleOrder(models.Model):
     num_person = fields.Integer(string="Number of Persons")
     remarks = fields.Text(string="Remarks")
 
-    @api.constrains('check_in', 'check_out')
-    def _check_checkin_checkout(self):
+    @api.constrains('room_number', 'check_in', 'check_out')
+    def _check_room_and_dates(self):
         for rec in self:
-            if rec.check_in and rec.check_out:
-                if rec.check_out < rec.check_in:
-                    raise ValidationError(
-                        "Check-out date cannot be before Check-in date."
-                    )
+
+            # Required field checks
+            if not rec.room_number:
+                raise ValidationError(
+                    "Room Number is required to proceed with checkout."
+                )
+
+            if not rec.check_in:
+                raise ValidationError(
+                    "Check-in date is required to proceed with checkout."
+                )
+
+            if not rec.check_out:
+                raise ValidationError(
+                    "Check-out date is required to proceed with checkout."
+                )
+
+            # Date logic
+            if rec.check_out < rec.check_in:
+                raise ValidationError(
+                    "Check-out date cannot be before Check-in date."
+                )
 
     def action_confirm(self):
         res = super().action_confirm()
